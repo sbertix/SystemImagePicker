@@ -1,0 +1,13 @@
+--commas inline
+--ifdef no-indent
+--xcodeindentation enabled
+--self init-only
+
+--enable blockComments
+--enable docComments
+--enable isEmpty
+--enable wrapEnumCases
+--enable wrapSwitchCases
+
+--disable wrapMultilineStatementBraces
+
