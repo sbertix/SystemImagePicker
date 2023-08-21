@@ -74,7 +74,7 @@ public struct SystemImageCollection<Value: Hashable>: Hashable {
 }
 
 /// A `struct` defining a picker section.
-public struct SystemImageSection: Decodable, Hashable, Identifiable {
+public struct SystemImageSection: Codable, Hashable, Identifiable {
     /// The name.
     public let title: String
     /// The optional system image.
@@ -100,7 +100,7 @@ private enum SystemImageCollectionCodingKeys: CodingKey {
     case values
 }
 
-extension SystemImageCollection: Decodable where Value == String {
+extension SystemImageCollection: Codable where Value == String {
     /// The version-specific default collection.
     public static let `default`: Self = {
         let url: URL?
@@ -109,11 +109,7 @@ extension SystemImageCollection: Decodable where Value == String {
         } else if #available(iOS 16, macOS 13, tvOS 16, watchOS 9, *) {
             url = Bundle.module.url(forResource: "symbols4", withExtension: "json")
         } else {
-            #if DEBUG
-            fatalError("Unsupported OS version.")
-            #else
-            url = nil
-            #endif
+            url = Bundle.module.url(forResource: "symbols3", withExtension: "json")
         }
         // Try and load them.
         guard let url,
@@ -134,11 +130,22 @@ extension SystemImageCollection: Decodable where Value == String {
     /// Init with decoder.
     ///
     /// - parameter decoder: Some `Decoder`.
+    /// - throws: Any `Error`.
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: SystemImageCollectionCodingKeys.self)
         let keys = try container.decode([SystemImageSection].self, forKey: .keys)
         let values = try container.decode([String: [Value]].self, forKey: .values)
         self.init(keys: keys, withValues: values)
+    }
+    
+    /// Encode using some encoder.
+    ///
+    /// - parameter encoder: Some `Encoder`.
+    /// - throws: Any `Error`.
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: SystemImageCollectionCodingKeys.self)
+        try container.encode(keys, forKey: .keys)
+        try container.encode(values, forKey: .values)
     }
 }
 

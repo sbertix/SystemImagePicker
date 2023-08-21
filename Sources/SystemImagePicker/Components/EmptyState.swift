@@ -13,9 +13,10 @@ import SwiftUI
 struct EmptyState: View {
     /// The current search term.
     let query: String
-
+    
     /// The underlying view.
     var body: some View {
+        #if compiler(>=5.9)
         // Adapt the empty state to the query.
         if #available(iOS 17, macOS 14, watchOS 10, tvOS 17, *) {
             if !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -29,23 +30,37 @@ struct EmptyState: View {
                 ).frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         } else {
-            VStack(spacing: 0) {
-                let isSearching = !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                Image(systemName: isSearching ? "magnifyingglass" : "exclamationmark.triangle.fill")
-                    .imageScale(.large)
-                    .font(.largeTitle)
-                    .foregroundStyle(.secondary)
-                    .padding(.bottom)
-                Text(isSearching ? "No results for \"\(query)\"" : "No symbol found")
-                    .font(.title2)
-                    .bold()
-                    .padding(.bottom, 4)
-                Text(isSearching ? "Check the spelling or try a new search." : "Check your data source.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            CustomEmptyState(query: query)
         }
+        #else
+        CustomEmptyState(query: query)
+        #endif
+    }
+}
+
+/// A `struct` defining a custom empty state.
+private struct CustomEmptyState: View {
+    /// The current search text.
+    let query: String
+    
+    /// The underlying view.
+    var body: some View {
+        VStack(spacing: 0) {
+            let isSearching = !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            Image(systemName: isSearching ? "magnifyingglass" : "exclamationmark.triangle.fill")
+                .imageScale(.large)
+                .font(.largeTitle)
+                .foregroundStyle(.secondary)
+                .padding(.bottom)
+            Text(isSearching ? "No results for \"\(query)\"" : "No symbol found")
+                .font(.title2)
+                .bold()
+                .padding(.bottom, 4)
+            Text(isSearching ? "Check the spelling or try a new search." : "Check your data source.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

@@ -18,11 +18,11 @@ struct Wrapper<Content: View>: View {
         #if !os(macOS)
         if #available(iOS 16, macOS 13, watchOS 9, tvOS 16, *) {
             NavigationStack {
-                content()
+                content().navigationBarTitleDisplayMode(.inline)
             }
         } else {
             NavigationView {
-                content()
+                content().navigationBarTitleDisplayMode(.inline)
             }.navigationViewStyle(.stack)
         }
         #else

@@ -206,7 +206,7 @@ public struct SystemImagePicker<Selection: Hashable, Value: Hashable>: View {
                             .lineLimit(1)
                             .fixedSize()
                             .padding(.horizontal, 12)
-                            #if compiler(<5.9) && !os(visionOS)
+                            #if compiler(<5.9) || !os(visionOS)
                             .background(.tint, in: RoundedRectangle(cornerRadius: 8))
                             .contentShape(RoundedRectangle(cornerRadius: 8))
                             #else

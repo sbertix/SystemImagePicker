@@ -15,7 +15,7 @@ import UIKit
 
 @testable import SystemImagePicker
 
-final class SystemImagePickerTests: XCTestCase {
+final class SystemImagePickerTests: XCTestCase {    
     /// Test there are no missing _SF Symbols_.
     func testMissingSystemImages() throws {
         var systemImageNames = try loadSystemImages()
