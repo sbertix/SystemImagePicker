@@ -24,7 +24,8 @@ let package = Package(
         ),
         .testTarget(
             name: "SystemImagePickerTests",
-            dependencies: ["SystemImagePicker"]
+            dependencies: ["SystemImagePicker"],
+            resources: [.process("Resources")]
         )
     ]
 )
