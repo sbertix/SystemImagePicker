@@ -105,9 +105,9 @@ final class SystemImagePickerTests: XCTestCase {
     /// - throws: Any `Error`.
     private func loadSystemImages() throws -> Set<String> {
         let url: URL?
-        if #available(iOS 17, macOS 14, tvOS 17, watchOS 10, *) {
+        if #available(iOS 17, macOS 14, watchOS 10, *) {
             url = Bundle.module.url(forResource: "symbols5", withExtension: "txt")
-        } else if #available(iOS 16, macOS 13, tvOS 16, watchOS 9, *) {
+        } else if #available(iOS 16, macOS 13, watchOS 9, *) {
             url = Bundle.module.url(forResource: "symbols4", withExtension: "txt")
         } else {
             url = Bundle.module.url(forResource: "symbols3", withExtension: "txt")

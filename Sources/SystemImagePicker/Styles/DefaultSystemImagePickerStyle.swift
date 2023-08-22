@@ -25,8 +25,6 @@ public extension SystemImagePickerStyle {
         64
         #elseif os(macOS)
         48
-        #elseif os(tvOS)
-        128
         #elseif compiler(>=5.9) && os(visionOS)
         64
         #else

@@ -16,7 +16,7 @@ struct Wrapper<Content: View>: View {
     /// The underlying view.
     var body: some View {
         #if !os(macOS)
-        if #available(iOS 16, macOS 13, watchOS 9, tvOS 16, *) {
+        if #available(iOS 16, watchOS 9, *) {
             NavigationStack {
                 content().navigationBarTitleDisplayMode(.inline)
             }

@@ -3,7 +3,6 @@
 [![Swift](https://img.shields.io/badge/Swift-5.8-%23DE5C43?style=flat&logo=swift)](https://swift.org)
 ![iOS](https://img.shields.io/badge/iOS-15.0-34c759)
 ![macOS](https://img.shields.io/badge/macOS-12-34c759)
-![tvOS](https://img.shields.io/badge/tvOS-15.0-34c759)
 ![watchOS](https://img.shields.io/badge/watchOS-8.0-34c759)
 ![visionOS](https://img.shields.io/badge/visionOS-1.0-34c759)
 

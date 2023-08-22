@@ -8,6 +8,10 @@
 import Foundation
 import SwiftUI
 
+#if os(tvOS)
+#error("SystemImagePicker is unavailable for tvOS. Please open up a discussion on the GitHub repo if it's a feature you need.")
+#endif
+
 /// A `struct` defining a picker utility to select
 /// a _SF Symbol_ within a collection.
 public struct SystemImagePicker<Selection: Hashable, Value: Hashable>: View {
@@ -99,7 +103,7 @@ public struct SystemImagePicker<Selection: Hashable, Value: Hashable>: View {
                             .frame(width: 16.0, height: 16.0)
                             .contentShape(Circle())
                     }
-                    .buttonStyle(.borderless)
+                    .buttonStyle(.plain)
                 }
                 .padding()
                 #endif

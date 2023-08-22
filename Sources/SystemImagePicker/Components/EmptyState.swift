@@ -18,7 +18,7 @@ struct EmptyState: View {
     var body: some View {
         #if compiler(>=5.9)
         // Adapt the empty state to the query.
-        if #available(iOS 17, macOS 14, watchOS 10, tvOS 17, *) {
+        if #available(iOS 17, macOS 14, watchOS 10, *) {
             if !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 ContentUnavailableView.search(text: query)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
