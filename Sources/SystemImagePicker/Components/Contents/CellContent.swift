@@ -44,6 +44,11 @@ public struct CellContent: View {
             .foregroundStyle(isSelected ? Color(.secondarySystemGroupedBackground) : .primary)
             .clipShape(RoundedRectangle(cornerRadius: 8))
             .contentShape(RoundedRectangle(cornerRadius: 8))
+            #elseif os(watchOS)
+            .background(isSelected ? Color.accentColor : .clear)
+            .foregroundStyle(isSelected ? AnyShapeStyle(.background) : AnyShapeStyle(.primary))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .contentShape(RoundedRectangle(cornerRadius: 8))
             #elseif compiler(>=5.9) && os(visionOS)
             .background(
                 isSelected ? AnyShapeStyle(.regularMaterial) : AnyShapeStyle(.clear),

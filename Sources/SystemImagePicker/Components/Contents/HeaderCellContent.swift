@@ -33,6 +33,9 @@ public struct HeaderCellContent: View {
                     .foregroundStyle(isSelected ? Color(.secondarySystemGroupedBackground) : .accentColor)
                     #elseif os(macOS)
                     .foregroundStyle(.tint)
+                    #elseif os(watchOS)
+                    .foregroundStyle(isSelected ? .secondary : .primary)
+                    .foregroundStyle(isSelected ? AnyShapeStyle(.background) : AnyShapeStyle(.tint))
                     #elseif compiler(>=5.9) && os(visionOS)
                     .foregroundStyle(.secondary)
                     #endif
@@ -68,6 +71,11 @@ public struct HeaderCellContent: View {
                 ? RoundedRectangle(cornerRadius: 8).strokeBorder(Color(.separatorColor), lineWidth: pixelLength)
                 : nil
         )
+        .contentShape(RoundedRectangle(cornerRadius: 8))
+        #elseif os(watchOS)
+        .background(isSelected ? Color.accentColor : .clear)
+        .foregroundStyle(isSelected ? AnyShapeStyle(.background) : AnyShapeStyle(.primary))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
         .contentShape(RoundedRectangle(cornerRadius: 8))
         #elseif compiler(>=5.9) && os(visionOS)
         .background(

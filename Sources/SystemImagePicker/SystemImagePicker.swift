@@ -187,79 +187,80 @@ public struct SystemImagePicker<Selection: Hashable, Value: Hashable>: View {
                 text: $query,
                 placement: .navigationBarDrawer(displayMode: .always)
             )
-            #endif
+            #elseif !os(watchOS)
             .safeAreaInset(edge: .bottom) {
-                    // Let users invalidate their symbol
-                    // without having to find it and toggle it.
-                    if let onInvalidate, let systemImage = id(selection) {
-                        Button(role: .destructive) {
-                            selection = onInvalidate()
-                            guard shouldAutoDismiss else { return }
-                            // Immediately reflect the selection and
-                            // dismiss the view.
+                // Let users invalidate their symbol
+                // without having to find it and toggle it.
+                if let onInvalidate, let systemImage = id(selection) {
+                    Button(role: .destructive) {
+                        selection = onInvalidate()
+                        guard shouldAutoDismiss else { return }
+                        // Immediately reflect the selection and
+                        // dismiss the view.
+                        onCommit(selection)
+                        dismiss()
+                    } label: {
+                        HStack {
+                            Image(systemName: systemImage)
+                                .font(.headline)
+                                .imageScale(.small)
+                            Text("Deselect Symbol")
+                                .font(.headline.smallCaps())
+                                .padding(.top, 8)
+                                .padding(.bottom, 10)
+                            Image(systemName: "xmark")
+                                .imageScale(.small)
+                                .font(.footnote.bold())
+                                .foregroundStyle(.secondary)
+                        }
+                        .lineLimit(1)
+                        .fixedSize()
+                        .padding(.horizontal, 12)
+                        #if compiler(<5.9) || !os(visionOS)
+                        .background(.tint, in: RoundedRectangle(cornerRadius: 8))
+                        .contentShape(RoundedRectangle(cornerRadius: 8))
+                        #else
+                        .background(.regularMaterial, in: Capsule())
+                        .contentShape(Capsule())
+                        #endif
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.red)
+                    .tint(.red.opacity(0.15))
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.bar)
+                    .overlay(Divider(), alignment: .top)
+                }
+            }
+            #endif
+            #if !os(macOS)
+            .toolbar {
+                // The dismiss button.
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel", role: .cancel) {
+                        defer { dismiss() }
+                        // If auto-dismiss is off, do not commit changes.
+                        guard shouldAutoDismiss else { return }
+                        onCommit(selection)
+                    }
+                }
+                // Only add the "Done" button when auto-dismiss is off.
+                ToolbarItem(placement: .confirmationAction) {
+                    if !shouldAutoDismiss {
+                        Button("Done") {
                             onCommit(selection)
                             dismiss()
-                        } label: {
-                            HStack {
-                                Image(systemName: systemImage)
-                                    .font(.headline)
-                                    .imageScale(.small)
-                                Text("Deselect Symbol")
-                                    .font(.headline.smallCaps())
-                                    .padding(.top, 8)
-                                    .padding(.bottom, 10)
-                                Image(systemName: "xmark")
-                                    .imageScale(.small)
-                                    .font(.footnote.bold())
-                                    .foregroundStyle(.secondary)
-                            }
-                            .lineLimit(1)
-                            .fixedSize()
-                            .padding(.horizontal, 12)
-                            #if compiler(<5.9) || !os(visionOS)
-                            .background(.tint, in: RoundedRectangle(cornerRadius: 8))
-                            .contentShape(RoundedRectangle(cornerRadius: 8))
-                            #else
-                            .background(.regularMaterial, in: Capsule())
-                            .contentShape(Capsule())
-                            #endif
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(.red)
-                        .tint(.red.opacity(0.15))
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(.bar)
-                        .overlay(Divider(), alignment: .top)
+                        }.disabled(initialSelection == selection)
                     }
                 }
-                #if !os(macOS)
-                .toolbar {
-                    // The dismiss button.
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel", role: .cancel) {
-                            defer { dismiss() }
-                            // If auto-dismiss is off, do not commit changes.
-                            guard shouldAutoDismiss else { return }
-                            onCommit(selection)
-                        }
-                    }
-                    // Only add the "Done" button when auto-dismiss is off.
-                    ToolbarItem(placement: .confirmationAction) {
-                        if !shouldAutoDismiss {
-                            Button("Done") {
-                                onCommit(selection)
-                                dismiss()
-                            }.disabled(initialSelection == selection)
-                        }
-                    }
-                }
-                #endif
-                // With `shouldAutoDismiss` set to off and changes
-                // being made, disable drag down to dismiss so the
-                // user has to explicitly pick whether to discard
-                // or confirm the selection.
-                .interactiveDismissDisabled(!shouldAutoDismiss && initialSelection != selection)
+            }
+            #endif
+            // With `shouldAutoDismiss` set to off and changes
+            // being made, disable drag down to dismiss so the
+            // user has to explicitly pick whether to discard
+            // or confirm the selection.
+            .interactiveDismissDisabled(!shouldAutoDismiss && initialSelection != selection)
         }
     }
 
