@@ -32,7 +32,7 @@ public extension View {
     ///
     /// - parameter shouldAutoDismiss: Whether it should auto-dismiss on selection or not.
     /// - returns: Some `View`.
-    func dismissOnSelection(_ shouldAutoDismiss: Bool) -> some View {
+    func systemImagePickerDismissOnSelection(_ shouldAutoDismiss: Bool) -> some View {
         environment(\.systemImagePickerShouldAutoDismiss, shouldAutoDismiss)
     }
 }

@@ -7,6 +7,12 @@
 
 import Foundation
 
+/// An `enum` listing all available `SystemImageCollection` coding keys.
+private enum SystemImageCollectionCodingKeys: CodingKey {
+    case keys
+    case values
+}
+
 /// A `struct` defining the main modal for the picker.
 ///
 /// System image collection can only be constructed with:
@@ -37,6 +43,13 @@ public struct SystemImageCollection<Value: Hashable>: Hashable {
         withValues values: [String: [Value]],
         id: KeyPath<Value, String>
     ) {
+        // - `values` and `keys` SHOULD generally have the same amount of items.
+        // - `keys` CAN be empty when `values` has exactly one item, for an ungroupped layout.
+        if values.count != keys.count && (!keys.isEmpty || values.count > 1) {
+            #if DEBUG
+            fatalError("Invalid number of items for `keys` (\(keys.count)) and `values` (\(values.count)).")
+            #endif
+        }
         self.keys = keys
         self.values = values
         self.id = id
@@ -62,42 +75,24 @@ public struct SystemImageCollection<Value: Hashable>: Hashable {
     public func filter(_ filter: (_ section: SystemImageSection, _ values: [Value]) -> [Value]) -> Self {
         var newKeys: [SystemImageSection] = []
         var newValues: [String: [Value]] = [:]
-        keys.forEach {
-            guard let values = values[$0.id], !values.isEmpty else { return }
-            let filteredValues = filter($0, values)
-            guard !filteredValues.isEmpty else { return }
-            newKeys.append($0)
-            newValues[$0.id] = filteredValues
+        // Consider the unsectioned scenario separately.
+        if keys.isEmpty,
+           values.count == 1,
+           let unsectionedValues = values[""],
+           !unsectionedValues.isEmpty {
+            let filteredValues = filter(.init(title: "", systemImage: nil), unsectionedValues)
+            if !filteredValues.isEmpty { newValues[""] = filteredValues }
+        } else {
+            keys.forEach {
+                guard let values = values[$0.id], !values.isEmpty else { return }
+                let filteredValues = filter($0, values)
+                guard !filteredValues.isEmpty else { return }
+                newKeys.append($0)
+                newValues[$0.id] = filteredValues
+            }
         }
         return .init(keys: newKeys, withValues: newValues, id: id)
     }
-}
-
-/// A `struct` defining a picker section.
-public struct SystemImageSection: Codable, Hashable, Identifiable {
-    /// The name.
-    public let title: String
-    /// The optional system image.
-    public let systemImage: String?
-
-    /// The section identifier.
-    public var id: String { title }
-
-    /// Init.
-    ///
-    /// - parameters:
-    ///     - title: The name used to identify the section.
-    ///     - systemImage: An optional _SF Symbol_ identifier.
-    public init(title: String, systemImage: String?) {
-        self.title = title
-        self.systemImage = systemImage
-    }
-}
-
-/// An `enum` listing all available `SystemImageCollection` coding keys.
-private enum SystemImageCollectionCodingKeys: CodingKey {
-    case keys
-    case values
 }
 
 extension SystemImageCollection: Codable where Value == String {
@@ -119,12 +114,38 @@ extension SystemImageCollection: Codable where Value == String {
         return collection
     }()
 
+    /// The version-specific **UNSECTIONED** default collection.
+    public static let `unsectionedDefault`: Self = {
+        let url: URL?
+        if #available(iOS 17, macOS 14, tvOS 17, watchOS 10, *) {
+            url = Bundle.module.url(forResource: "symbols5", withExtension: "txt")
+        } else if #available(iOS 16, macOS 13, tvOS 16, watchOS 9, *) {
+            url = Bundle.module.url(forResource: "symbols4", withExtension: "txt")
+        } else {
+            url = Bundle.module.url(forResource: "symbols3", withExtension: "txt")
+        }
+        // Try and load them.
+        guard let url,
+              let collection = try? SystemImageCollection(unsectionedAt: url) else {
+            return .init(keys: [], withValues: [:], id: \.self)
+        }
+        return collection
+    }()
+
     /// Load  a collection from a `.json` file at a given URL.
     ///
     /// - parameter url: The `URL` to the `.json` _SF Symbols_ file.
     public init(at url: URL) throws {
         let data = try Data(contentsOf: url)
         self = try JSONDecoder().decode(Self.self, from: data)
+    }
+
+    /// Load  a collection from a `.txt` file at a given URL.
+    ///
+    /// - parameter url: The `URL` to the `.txt` _SF Symbols_ file.
+    public init(unsectionedAt url: URL) throws {
+        let text = try String(contentsOf: url)
+        self = .init(unsectionedValues: text.split(separator: "\n").map(String.init))
     }
 
     /// Init with decoder.
@@ -158,6 +179,14 @@ public extension SystemImageCollection where Value: StringProtocol {
     init(keys: [SystemImageSection], withValues values: [String: [Value]]) {
         self.init(keys: keys, withValues: values, id: \.localizedLowercase)
     }
+
+    /// Init.
+    ///
+    /// - parameters:
+    ///     - values: A sorted array of _SF Symbol_ identifiers for each section.
+    init(unsectionedValues values: [Value]) {
+        self.init(keys: [], withValues: ["": values])
+    }
 }
 
 public extension SystemImageCollection where Value: Identifiable, Value.ID: StringProtocol {
@@ -169,12 +198,28 @@ public extension SystemImageCollection where Value: Identifiable, Value.ID: Stri
     init(keys: [SystemImageSection], withValues values: [String: [Value]]) {
         self.init(keys: keys, withValues: values, id: \.id.localizedLowercase)
     }
+
+    /// Init.
+    ///
+    /// - parameters:
+    ///     - values: A sorted array of _SF Symbol_ identifiers for each section.
+    init(unsectionedValues values: [Value]) {
+        self.init(keys: [], withValues: ["": values])
+    }
 }
 
 public extension SystemImageCollection where Value: RawRepresentable, Value.RawValue == String {
     /// The version-specific default collection.
     static var `default`: Self {
         let collection: SystemImageCollection<String> = .default
+        return .init(keys: collection.keys, withValues: collection.values.mapValues {
+            $0.compactMap(Value.init(rawValue:))
+        })
+    }
+
+    /// The version-specific default **UNSECTIONED** collection.
+    static var `unsectionedDefault`: Self {
+        let collection: SystemImageCollection<String> = .unsectionedDefault
         return .init(keys: collection.keys, withValues: collection.values.mapValues {
             $0.compactMap(Value.init(rawValue:))
         })
@@ -189,5 +234,13 @@ public extension SystemImageCollection where Value: RawRepresentable, Value.RawV
     ///     - values: A dictionary containing a sorted array of _SF Symbol_ identifiers for each section.
     init(keys: [SystemImageSection], withValues values: [String: [Value]]) {
         self.init(keys: keys, withValues: values, id: \.rawValue.localizedLowercase)
+    }
+
+    /// Init.
+    ///
+    /// - parameters:
+    ///     - values: A sorted array of _SF Symbol_ identifiers for each section.
+    init(unsectionedValues values: [Value]) {
+        self.init(keys: [], withValues: ["": values])
     }
 }

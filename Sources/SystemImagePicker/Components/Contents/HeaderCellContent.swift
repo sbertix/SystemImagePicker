@@ -12,7 +12,7 @@ import SwiftUI
 public struct HeaderCellContent: View {
     /// The pixel length.
     @Environment(\.pixelLength) private var pixelLength
-    
+
     /// The section name.
     let title: String
     /// The _SF Symbol_ identifier, if it exists.

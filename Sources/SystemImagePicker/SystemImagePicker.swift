@@ -64,7 +64,6 @@ public struct SystemImagePicker<Selection: Hashable, Value: Hashable>: View {
         return data.filter {
             $1.filter {
                 let id = $0[keyPath: data.id]
-                print(isHumanReadable, id, words, words.allSatisfy(id.localizedStandardContains))
                 return isHumanReadable
                     ? words.allSatisfy(id.localizedStandardContains)
                     : id.localizedStandardContains(query)
@@ -108,17 +107,20 @@ public struct SystemImagePicker<Selection: Hashable, Value: Hashable>: View {
                 if data.values.isEmpty {
                     EmptyState(query: query)
                 } else {
-                    // A scrollable quick-jump to filter a
-                    // specific section.
-                    Header(selection: $filter, data: data)
-                    #if compiler(<5.9) || !os(visionOS)
-                    Divider()
-                        #if !os(macOS)
-                        .padding([.leading, .top])
-                        #else
-                        .padding(.top)
+                    // A scrollable quick-jump to filter a specific section,
+                    // as long as there are available sections on the original
+                    // unfiltered collection.
+                    if !self.data.keys.isEmpty {
+                        Header(selection: $filter, data: data)
+                        #if compiler(<5.9) || !os(visionOS)
+                        Divider()
+                            #if !os(macOS)
+                            .padding([.leading, .top])
+                            #else
+                            .padding(.top)
+                            #endif
                         #endif
-                    #endif
+                    }
                     ScrollViewReader { scrollView in
                         ScrollView {
                             LazyVGrid(columns: [.init(.adaptive(
@@ -126,7 +128,9 @@ public struct SystemImagePicker<Selection: Hashable, Value: Hashable>: View {
                                 maximum: idealWidth * 1.1
                             ))]) {
                                 // Enumerate the values.
-                                ForEach(data.values[filter] ?? [], id: \.self) {
+                                // If the original data has no `keys`, consider
+                                // it unsectioned.
+                                ForEach(data.values[filter] ?? (self.data.keys.isEmpty ? data.values.first?.value : []) ?? [], id: \.self) {
                                     Cell(
                                         selectionSystemImage: selectionSystemImage,
                                         value: $0,
@@ -308,6 +312,33 @@ public extension SystemImagePicker where Selection == Value {
 
     /// Init.
     ///
+    /// - parameters:
+    ///     - selection: The selected _SF Symbol_ representation binding.
+    ///     - data: An array of sorted _SF Symbol_ identifiers to pick from.
+    init(selection: Binding<Selection>, data: [Value]) where Value: StringProtocol {
+        self.init(selection: selection, data: .init(unsectionedValues: data))
+    }
+
+    /// Init.
+    ///
+    /// - parameters:
+    ///     - selection: The selected _SF Symbol_ representation binding.
+    ///     - data: An array of sorted _SF Symbol_ identifiers to pick from.
+    init(selection: Binding<Selection>, data: [Value]) where Value: Identifiable, Value.ID: StringProtocol {
+        self.init(selection: selection, data: .init(unsectionedValues: data))
+    }
+
+    /// Init.
+    ///
+    /// - parameters:
+    ///     - selection: The selected _SF Symbol_ representation binding.
+    ///     - data: An array of sorted _SF Symbol_ identifiers to pick from.
+    init(selection: Binding<Selection>, data: [Value]) where Value: RawRepresentable, Value.RawValue: StringProtocol {
+        self.init(selection: selection, data: .init(unsectionedValues: data))
+    }
+
+    /// Init.
+    ///
     /// - parameter selection: The selected _SF Symbol_ representation binding.
     init(selection: Binding<Selection>) where Value == String {
         self.init(selection: selection, data: .default)
@@ -349,5 +380,32 @@ public extension SystemImagePicker where Selection == Value? {
     /// - parameter selection: The selected _SF Symbol_ representation binding.
     init(selection: Binding<Selection>) where Value: RawRepresentable, Value.RawValue == String {
         self.init(selection: selection, data: .default)
+    }
+
+    /// Init.
+    ///
+    /// - parameters:
+    ///     - selection: The selected _SF Symbol_ representation binding.
+    ///     - data: An array of sorted _SF Symbol_ identifiers to pick from.
+    init(selection: Binding<Selection>, data: [Value]) where Value: StringProtocol {
+        self.init(selection: selection, data: .init(unsectionedValues: data))
+    }
+
+    /// Init.
+    ///
+    /// - parameters:
+    ///     - selection: The selected _SF Symbol_ representation binding.
+    ///     - data: An array of sorted _SF Symbol_ identifiers to pick from.
+    init(selection: Binding<Selection>, data: [Value]) where Value: Identifiable, Value.ID: StringProtocol {
+        self.init(selection: selection, data: .init(unsectionedValues: data))
+    }
+
+    /// Init.
+    ///
+    /// - parameters:
+    ///     - selection: The selected _SF Symbol_ representation binding.
+    ///     - data: An array of sorted _SF Symbol_ identifiers to pick from.
+    init(selection: Binding<Selection>, data: [Value]) where Value: RawRepresentable, Value.RawValue: StringProtocol {
+        self.init(selection: selection, data: .init(unsectionedValues: data))
     }
 }

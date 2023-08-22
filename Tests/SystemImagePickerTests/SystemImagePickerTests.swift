@@ -51,6 +51,35 @@ final class SystemImagePickerTests: XCTestCase {
         }
     }
 
+    /// Test default unsectioned collections.
+    func testSystemImageUnsectionedCollectionDefaults() throws {
+        struct Represented: Hashable, RawRepresentable { let rawValue: String; }
+
+        let control = try loadSystemImages()
+        XCTAssertEqual(
+            .init(SystemImageCollection.unsectionedDefault.values.values.reduce(into: []) { $0 += $1 }),
+            control
+        )
+        XCTAssertEqual(
+            .init(SystemImageCollection.unsectionedDefault.values.values.reduce(into: []) { $0 += $1 }),
+            Set(control.compactMap(Represented.init))
+        )
+    }
+
+    /// Test unsectioned collections initializers.
+    func testSystemImageUnsectionedCollectionsInit() {
+        struct Identified: Hashable, Identifiable { let id: String = UUID().uuidString }
+        struct Represented: Hashable, RawRepresentable { let rawValue: String; init(rawValue: String = UUID().uuidString) { self.rawValue = rawValue }}
+
+        let strings: [String] = (0 ..< 100).map { _ in UUID().uuidString }
+        let identified: [Identified] = (0 ..< 100).map { _ in Identified() }
+        let represented: [Represented] = (0 ..< 100).map { _ in Represented() }
+
+        XCTAssertEqual(SystemImageCollection(unsectionedValues: strings), .init(keys: [], withValues: ["": strings]))
+        XCTAssertEqual(SystemImageCollection(unsectionedValues: identified), .init(keys: [], withValues: ["": identified]))
+        XCTAssertEqual(SystemImageCollection(unsectionedValues: represented), .init(keys: [], withValues: ["": represented]))
+    }
+
     // MARK: Private
 
     /// Test a _SF Symbol_ actually exists for a given name.
