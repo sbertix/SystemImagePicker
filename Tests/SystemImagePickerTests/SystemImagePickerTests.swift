@@ -15,7 +15,7 @@ import UIKit
 
 @testable import SystemImagePicker
 
-final class SystemImagePickerTests: XCTestCase {    
+final class SystemImagePickerTests: XCTestCase {
     /// Test there are no missing _SF Symbols_.
     func testMissingSystemImages() throws {
         var systemImageNames = try loadSystemImages()
@@ -31,7 +31,7 @@ final class SystemImagePickerTests: XCTestCase {
             XCTAssertFalse($0.isEmpty)
         }
     }
-    
+
     /// Test all provided sections have valid _SF Symbols_.
     func testSystemImageHeader() {
         SystemImageCollection.default
@@ -50,9 +50,9 @@ final class SystemImagePickerTests: XCTestCase {
             $0.forEach(assertValidSystemImage)
         }
     }
-        
+
     // MARK: Private
-    
+
     /// Test a _SF Symbol_ actually exists for a given name.
     ///
     /// - parameter name: The tentative _SF Symbol_ identifier..
@@ -69,7 +69,7 @@ final class SystemImagePickerTests: XCTestCase {
         )
         #endif
     }
-    
+
     /// Load the correct plain list of _SF Symbols_.
     ///
     /// - returns: A set of _SF Symbol_ identifiers.

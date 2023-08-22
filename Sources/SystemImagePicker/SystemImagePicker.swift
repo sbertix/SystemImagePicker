@@ -16,6 +16,8 @@ public struct SystemImagePicker<Selection: Hashable, Value: Hashable>: View {
 
     /// Whether it should auto-dismiss on selection or not.
     @Environment(\.systemImagePickerShouldAutoDismiss) private var shouldAutoDismiss
+    /// The current layout style.
+    @Environment(\.systemImagePickerStyle) private var style
 
     /// The active section filter.
     @State private var filter: String
@@ -74,6 +76,7 @@ public struct SystemImagePicker<Selection: Hashable, Value: Hashable>: View {
     public var body: some View {
         let data = filteredData
         let selectionSystemImage = id(selection)
+        let idealWidth = style.cellIdealWidth
 
         // The actual content.
         Wrapper {
@@ -110,15 +113,18 @@ public struct SystemImagePicker<Selection: Hashable, Value: Hashable>: View {
                     Header(selection: $filter, data: data)
                     #if compiler(<5.9) || !os(visionOS)
                     Divider()
-                    #if !os(macOS)
+                        #if !os(macOS)
                         .padding([.leading, .top])
-                    #else
+                        #else
                         .padding(.top)
-                    #endif
+                        #endif
                     #endif
                     ScrollViewReader { scrollView in
                         ScrollView {
-                            LazyVGrid(columns: [.init(.adaptive(minimum: Cell<Value>.idealWidth / 1.1, maximum: Cell<Value>.idealWidth * 1.1))]) {
+                            LazyVGrid(columns: [.init(.adaptive(
+                                minimum: idealWidth / 1.1,
+                                maximum: idealWidth * 1.1
+                            ))]) {
                                 // Enumerate the values.
                                 ForEach(data.values[filter] ?? [], id: \.self) {
                                     Cell(

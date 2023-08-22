@@ -13,7 +13,7 @@ import SwiftUI
 struct EmptyState: View {
     /// The current search term.
     let query: String
-    
+
     /// The underlying view.
     var body: some View {
         #if compiler(>=5.9)
@@ -42,7 +42,7 @@ struct EmptyState: View {
 private struct CustomEmptyState: View {
     /// The current search text.
     let query: String
-    
+
     /// The underlying view.
     var body: some View {
         VStack(spacing: 0) {

@@ -137,7 +137,7 @@ extension SystemImageCollection: Codable where Value == String {
         let values = try container.decode([String: [Value]].self, forKey: .values)
         self.init(keys: keys, withValues: values)
     }
-    
+
     /// Encode using some encoder.
     ///
     /// - parameter encoder: Some `Encoder`.

@@ -1,38 +1,34 @@
 //
 //  SystemImagePickerStyleEnvironmentKey.swift
-//  SystemImagePicker
 //
-//  Created by Stefano Bertagno on 20/08/23.
+//
+//  Created by Stefano Bertagno on 22/08/23.
 //
 
 import Foundation
 import SwiftUI
 
-/// A `struct` defining an environment key used to track
-/// whether the picker should auto-dismiss or not.
-private struct SystemImagePickerShouldAutoDismissEnvironmentKey: EnvironmentKey {
-    /// Defaults to auto-dismissing.
-    public static let defaultValue: Bool = true
+/// A `struct` defining an environment key tracking the
+/// system image picker preferred layout style.
+public struct SystemImagePickerStyleEnvironmentKey: EnvironmentKey {
+    /// Defaults to `nil`, meaning `DefaultSystemImagePickerStyle` will be used.
+    public static var defaultValue: AnySystemImagePickerStyle = .init(.default)
 }
 
 extension EnvironmentValues {
-    /// The currently defined system image picker style.
-    ///
-    /// Defaults to `.default`.
-    fileprivate(set) var systemImagePickerShouldAutoDismiss: Bool {
-        get { self[SystemImagePickerShouldAutoDismissEnvironmentKey.self] }
-        set { self[SystemImagePickerShouldAutoDismissEnvironmentKey.self] = newValue }
+    /// The system image picker preferred layout style.
+    fileprivate(set) var systemImagePickerStyle: AnySystemImagePickerStyle {
+        get { self[SystemImagePickerStyleEnvironmentKey.self] }
+        set { self[SystemImagePickerStyleEnvironmentKey.self] = newValue }
     }
 }
 
 public extension View {
-    @available(macOS, unavailable)
-    @available(watchOS, unavailable)
-    /// Update wheter children system image pickers should auto-dismiss on selection or not.
+    /// Update the preferred system image picker layout style.
     ///
-    /// - parameter shouldAutoDismiss: Whether it should auto-dismiss on selection or not.
+    /// - parameter style: Some `SystemImagePickerStyle`.
     /// - returns: Some `View`.
-    func dismissOnSelection(_ shouldAutoDismiss: Bool) -> some View {
-        environment(\.systemImagePickerShouldAutoDismiss, shouldAutoDismiss)
+    func systemImagePickerStyle(_ style: some SystemImagePickerStyle) -> some View {
+        environment(\.systemImagePickerStyle, .init(style))
     }
 }
